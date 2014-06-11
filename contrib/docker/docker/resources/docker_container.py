@@ -293,8 +293,16 @@ class DockerContainer(resource.Resource):
         return self.resource_id
 
     def check_delete_complete(self, container_id):
-        status = self._get_container_status(container_id)
-        return (not status['Running'])
+        exists=False
+        containers=self.get_client().containers(all=True)
+        for container in containers:
+            if container["Id"] == container_id:
+                exists=True
+        if exists:
+            status = self._get_container_status(container_id)
+            return (not status['Running'])
+        else:
+            return True
 
     def handle_suspend(self):
         if not self.resource_id:
